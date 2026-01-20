@@ -25,10 +25,12 @@ Submit a cart for order processing. The system will check if the cart contains a
 **Endpoint:** `POST /v1/carts/submit`
 
 **Headers:**
+
 - `Authorization: Bearer {api_key}` (required)
 - `Idempotency-Key: {uuid}` (optional, recommended)
 
 **Request Body:**
+
 ```json
 {
   "partner_order_id": "ORDER-2024-001",
@@ -49,15 +51,14 @@ Submit a cart for order processing. The system will check if the cart contains a
     }
   ],
   "customer": {
-    "name": "John Doe",
+    "name": "Feras khouri",
     "phone": "+1234567890"
   },
   "shipping": {
     "street": "123 Main Street",
-    "city": "New York",
-    "state": "NY",
-    "postal_code": "10001",
-    "country": "US"
+    "city": "salt",
+    "govement ": "NY",
+    "house number": "1",
   },
   "totals": {
     "subtotal": 79.97,
@@ -70,6 +71,7 @@ Submit a cart for order processing. The system will check if the cart contains a
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "supplier_order_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -78,10 +80,12 @@ Submit a cart for order processing. The system will check if the cart contains a
 ```
 
 **Response (204 No Content):**
+
 - Cart does not contain any JafarShop products
 - No response body
 
 **Response (409 Conflict):**
+
 ```json
 {
   "error": "idempotency key conflict: same key used with different payload"
@@ -89,6 +93,7 @@ Submit a cart for order processing. The system will check if the cart contains a
 ```
 
 **Response (422 Unprocessable Entity):**
+
 ```json
 {
   "error": "validation failed",
@@ -103,12 +108,15 @@ Retrieve the current status and details of an order.
 **Endpoint:** `GET /v1/orders/{supplier_order_id}`
 
 **Headers:**
+
 - `Authorization: Bearer {api_key}` (required)
 
 **Path Parameters:**
+
 - `supplier_order_id` - UUID of the supplier order
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -151,6 +159,7 @@ Retrieve the current status and details of an order.
 ```
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "order not found"
@@ -158,11 +167,13 @@ Retrieve the current status and details of an order.
 ```
 
 **Response (403 Forbidden):**
+
 ```json
 {
   "error": "access denied"
 }
 ```
+
 (Returned when the order belongs to a different partner)
 
 ### 3. Confirm Order (Admin)
@@ -172,9 +183,11 @@ Confirm an order for fulfillment.
 **Endpoint:** `POST /v1/admin/orders/{id}/confirm`
 
 **Headers:**
+
 - `Authorization: Bearer {api_key}` (required)
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -189,9 +202,11 @@ Reject an order with a reason.
 **Endpoint:** `POST /v1/admin/orders/{id}/reject`
 
 **Headers:**
+
 - `Authorization: Bearer {api_key}` (required)
 
 **Request Body:**
+
 ```json
 {
   "reason": "Product out of stock"
@@ -199,6 +214,7 @@ Reject an order with a reason.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -213,9 +229,11 @@ Mark an order as shipped with tracking information.
 **Endpoint:** `POST /v1/admin/orders/{id}/ship`
 
 **Headers:**
+
 - `Authorization: Bearer {api_key}` (required)
 
 **Request Body:**
+
 ```json
 {
   "carrier": "UPS",
@@ -225,6 +243,7 @@ Mark an order as shipped with tracking information.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -242,14 +261,17 @@ List orders with optional filtering.
 **Endpoint:** `GET /v1/admin/orders`
 
 **Headers:**
+
 - `Authorization: Bearer {api_key}` (required)
 
 **Query Parameters:**
+
 - `status` (optional) - Filter by status (PENDING_CONFIRMATION, CONFIRMED, REJECTED, SHIPPED, DELIVERED, CANCELLED)
 - `limit` (optional, default: 50) - Number of results (1-100)
 - `offset` (optional, default: 0) - Pagination offset
 
 **Response (200 OK):**
+
 ```json
 {
   "orders": [
@@ -317,4 +339,4 @@ Currently no rate limiting is implemented. This will be added in a future versio
 
 ## Support
 
-For API support, contact: [support email]
+For API support, contact: Feras.jafarShop@gmail.com

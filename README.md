@@ -75,7 +75,7 @@ B2BAPI/
 
 5. **Configure environment variables**
    ```bash
-   cp .env.example .env
+   cp env.example .env
    # Edit .env with your configuration
    ```
 
@@ -90,7 +90,7 @@ B2BAPI/
 
 ## Configuration
 
-Environment variables (see `.env.example`):
+Environment variables (see `env.example`):
 
 - `PORT` - Server port (default: 8080)
 - `ENVIRONMENT` - Environment (development/production)
