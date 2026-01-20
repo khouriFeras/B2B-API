@@ -29,6 +29,7 @@ type SupplierOrder struct {
 	ShippingAddress     map[string]interface{} // JSONB
 	CartTotal           float64
 	PaymentStatus       string
+	PaymentMethod       *string
 	RejectionReason     *string
 	TrackingCarrier     *string
 	TrackingNumber      *string

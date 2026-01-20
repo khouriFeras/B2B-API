@@ -51,14 +51,15 @@ Submit a cart for order processing. The system will check if the cart contains a
     }
   ],
   "customer": {
-    "name": "Feras khouri",
+    "name": "John Doe",
     "phone": "+1234567890"
   },
   "shipping": {
     "street": "123 Main Street",
-    "city": "salt",
-    "govement ": "NY",
-    "house number": "1",
+    "city": "New York",
+    "state": "NY",
+    "postal_code": "10001",
+    "country": "US"
   },
   "totals": {
     "subtotal": 79.97,
@@ -66,7 +67,8 @@ Submit a cart for order processing. The system will check if the cart contains a
     "shipping": 5.00,
     "total": 91.37
   },
-  "payment_status": "paid"
+  "payment_status": "paid",
+  "payment_method": "Credit Card"
 }
 ```
 
@@ -134,6 +136,7 @@ Retrieve the current status and details of an order.
   },
   "cart_total": 91.37,
   "payment_status": "paid",
+  "payment_method": "Credit Card",
   "items": [
     {
       "sku": "JS-PROD-001",
@@ -299,6 +302,14 @@ List orders with optional filtering.
 - `SHIPPED` - Order shipped (with tracking)
 - `DELIVERED` - Order delivered (optional)
 - `CANCELLED` - Order cancelled
+
+## Payment Methods
+
+Supported payment methods:
+- `Card On Delivery` - Card payment on delivery
+- `Cash On Delivery (COD)` - Cash payment on delivery
+- `Credit Card` - Credit card payment
+- `ZainCash` - ZainCash payment
 
 ## Idempotency
 

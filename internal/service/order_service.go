@@ -39,6 +39,7 @@ func (s *orderService) CreateOrderFromCart(
 		CustomerName:   req.Customer.Name,
 		CartTotal:      req.Totals.Total,
 		PaymentStatus:  req.PaymentStatus,
+		PaymentMethod:  req.PaymentMethod,
 	}
 
 	if req.Customer.Phone != nil {

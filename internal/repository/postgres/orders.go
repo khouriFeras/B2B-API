@@ -31,10 +31,10 @@ func (r *supplierOrderRepository) Create(ctx context.Context, order *domain.Supp
 		INSERT INTO supplier_orders (
 			id, partner_id, partner_order_id, status, shopify_draft_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
-			payment_status, rejection_reason, tracking_carrier, tracking_number,
+			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 	`
 
 	now := time.Now()
@@ -64,6 +64,7 @@ func (r *supplierOrderRepository) Create(ctx context.Context, order *domain.Supp
 		shippingAddressJSON,
 		order.CartTotal,
 		order.PaymentStatus,
+		order.PaymentMethod,
 		order.RejectionReason,
 		order.TrackingCarrier,
 		order.TrackingNumber,
@@ -84,7 +85,7 @@ func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 	query := `
 		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
-			payment_status, rejection_reason, tracking_carrier, tracking_number,
+			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
 		FROM supplier_orders
 		WHERE id = $1
@@ -95,6 +96,7 @@ func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 	var shopifyDraftOrderID sql.NullInt64
 	var customerPhone sql.NullString
 	var paymentStatus sql.NullString
+	var paymentMethod sql.NullString
 	var rejectionReason sql.NullString
 	var trackingCarrier sql.NullString
 	var trackingNumber sql.NullString
@@ -111,6 +113,7 @@ func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 		&shippingAddressJSON,
 		&order.CartTotal,
 		&paymentStatus,
+		&paymentMethod,
 		&rejectionReason,
 		&trackingCarrier,
 		&trackingNumber,
@@ -136,6 +139,9 @@ func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 	if paymentStatus.Valid {
 		order.PaymentStatus = paymentStatus.String
 	}
+	if paymentMethod.Valid {
+		order.PaymentMethod = &paymentMethod.String
+	}
 	if rejectionReason.Valid {
 		order.RejectionReason = &rejectionReason.String
 	}
@@ -160,7 +166,7 @@ func (r *supplierOrderRepository) GetByPartnerIDAndPartnerOrderID(ctx context.Co
 	query := `
 		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
-			payment_status, rejection_reason, tracking_carrier, tracking_number,
+			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
 		FROM supplier_orders
 		WHERE partner_id = $1 AND partner_order_id = $2
@@ -171,6 +177,7 @@ func (r *supplierOrderRepository) GetByPartnerIDAndPartnerOrderID(ctx context.Co
 	var shopifyDraftOrderID sql.NullInt64
 	var customerPhone sql.NullString
 	var paymentStatus sql.NullString
+	var paymentMethod sql.NullString
 	var rejectionReason sql.NullString
 	var trackingCarrier sql.NullString
 	var trackingNumber sql.NullString
@@ -187,6 +194,7 @@ func (r *supplierOrderRepository) GetByPartnerIDAndPartnerOrderID(ctx context.Co
 		&shippingAddressJSON,
 		&order.CartTotal,
 		&paymentStatus,
+		&paymentMethod,
 		&rejectionReason,
 		&trackingCarrier,
 		&trackingNumber,
@@ -211,6 +219,9 @@ func (r *supplierOrderRepository) GetByPartnerIDAndPartnerOrderID(ctx context.Co
 	}
 	if paymentStatus.Valid {
 		order.PaymentStatus = paymentStatus.String
+	}
+	if paymentMethod.Valid {
+		order.PaymentMethod = &paymentMethod.String
 	}
 	if rejectionReason.Valid {
 		order.RejectionReason = &rejectionReason.String
@@ -237,8 +248,8 @@ func (r *supplierOrderRepository) Update(ctx context.Context, order *domain.Supp
 		UPDATE supplier_orders
 		SET status = $2, shopify_draft_order_id = $3, customer_name = $4,
 			customer_phone = $5, shipping_address = $6, cart_total = $7,
-			payment_status = $8, rejection_reason = $9, tracking_carrier = $10,
-			tracking_number = $11, tracking_url = $12, updated_at = $13
+			payment_status = $8, payment_method = $9, rejection_reason = $10, tracking_carrier = $11,
+			tracking_number = $12, tracking_url = $13, updated_at = $14
 		WHERE id = $1
 	`
 
@@ -257,6 +268,7 @@ func (r *supplierOrderRepository) Update(ctx context.Context, order *domain.Supp
 		shippingAddressJSON,
 		order.CartTotal,
 		order.PaymentStatus,
+		order.PaymentMethod,
 		order.RejectionReason,
 		order.TrackingCarrier,
 		order.TrackingNumber,
@@ -325,7 +337,7 @@ func (r *supplierOrderRepository) ListByPartnerID(ctx context.Context, partnerID
 	query := `
 		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
-			payment_status, rejection_reason, tracking_carrier, tracking_number,
+			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
 		FROM supplier_orders
 		WHERE partner_id = $1
@@ -356,7 +368,7 @@ func (r *supplierOrderRepository) ListByStatus(ctx context.Context, status domai
 	query := `
 		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
-			payment_status, rejection_reason, tracking_carrier, tracking_number,
+			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
 		FROM supplier_orders
 		WHERE status = $1
@@ -389,6 +401,7 @@ func (r *supplierOrderRepository) scanOrder(rows *sql.Rows) (*domain.SupplierOrd
 	var shopifyDraftOrderID sql.NullInt64
 	var customerPhone sql.NullString
 	var paymentStatus sql.NullString
+	var paymentMethod sql.NullString
 	var rejectionReason sql.NullString
 	var trackingCarrier sql.NullString
 	var trackingNumber sql.NullString
@@ -405,6 +418,7 @@ func (r *supplierOrderRepository) scanOrder(rows *sql.Rows) (*domain.SupplierOrd
 		&shippingAddressJSON,
 		&order.CartTotal,
 		&paymentStatus,
+		&paymentMethod,
 		&rejectionReason,
 		&trackingCarrier,
 		&trackingNumber,
@@ -425,6 +439,9 @@ func (r *supplierOrderRepository) scanOrder(rows *sql.Rows) (*domain.SupplierOrd
 	}
 	if paymentStatus.Valid {
 		order.PaymentStatus = paymentStatus.String
+	}
+	if paymentMethod.Valid {
+		order.PaymentMethod = &paymentMethod.String
 	}
 	if rejectionReason.Valid {
 		order.RejectionReason = &rejectionReason.String

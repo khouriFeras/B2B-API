@@ -8,6 +8,7 @@ type CartSubmitRequest struct {
 	Shipping       ShippingAddress         `json:"shipping" binding:"required"`
 	Totals         CartTotals             `json:"totals" binding:"required"`
 	PaymentStatus  string                 `json:"payment_status"`
+	PaymentMethod  *string                `json:"payment_method,omitempty"`
 }
 
 type CartItem struct {

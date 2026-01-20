@@ -24,6 +24,7 @@ type OrderResponse struct {
 	ShippingAddress     map[string]interface{} `json:"shipping_address"`
 	CartTotal           float64               `json:"cart_total"`
 	PaymentStatus       string                 `json:"payment_status,omitempty"`
+	PaymentMethod       *string               `json:"payment_method,omitempty"`
 	RejectionReason     *string               `json:"rejection_reason,omitempty"`
 	TrackingCarrier     *string               `json:"tracking_carrier,omitempty"`
 	TrackingNumber      *string               `json:"tracking_number,omitempty"`
@@ -119,6 +120,9 @@ func HandleGetOrder(repos *repository.Repositories, logger *zap.Logger) gin.Hand
 		}
 		if order.PaymentStatus != "" {
 			response.PaymentStatus = order.PaymentStatus
+		}
+		if order.PaymentMethod != nil {
+			response.PaymentMethod = order.PaymentMethod
 		}
 		if order.RejectionReason != nil {
 			response.RejectionReason = order.RejectionReason
