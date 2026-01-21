@@ -263,4 +263,4 @@ migrate -path ./migrations -database "postgres://..." down
 
 ## License
 
-[Your License Here]
+private use only 
