@@ -24,6 +24,7 @@ type SupplierOrder struct {
 	PartnerOrderID      string
 	Status              OrderStatus
 	ShopifyDraftOrderID *int64
+	ShopifyOrderID      *int64
 	CustomerName        string
 	CustomerPhone       string
 	ShippingAddress     map[string]interface{} // JSONB

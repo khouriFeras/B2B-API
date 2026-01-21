@@ -53,7 +53,7 @@ func main() {
 	// Create Shopify client
 	client := shopify.NewClient(cfg.Shopify, logger)
 
-	fmt.Println("Checking API permissions...\n")
+	fmt.Println("Checking API permissions...")
 
 	// Test read_products
 	fmt.Println("1. Testing 'read_products' permission...")

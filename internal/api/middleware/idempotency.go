@@ -66,7 +66,7 @@ func IdempotencyMiddleware(repos *repository.Repositories, logger *zap.Logger) g
 			}
 
 			// Same key, same payload - return existing order
-			c.Set("idempotency_existing_order_id", existingKey.SupplierOrderID)
+			c.Set("idempotency_existing_order_id", existingKey.SupplierOrderID.String())
 			c.Set("idempotency_key_used", true)
 		} else {
 			// New key - will be stored after order creation

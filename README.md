@@ -194,9 +194,9 @@ Mark order as shipped with tracking.
 **Request Body:**
 ```json
 {
-  "carrier": "UPS",
-  "tracking_number": "1Z999AA10123456784",
-  "tracking_url": "https://ups.com/track/1Z999AA10123456784"
+  "carrier": "Standard Shipping",
+  "tracking_number": "TRACK123456789",
+  "tracking_url": "https://example.com/track/TRACK123456789"
 }
 ```
 

@@ -29,12 +29,12 @@ func NewSupplierOrderRepository(db *sql.DB, logger *zap.Logger) *supplierOrderRe
 func (r *supplierOrderRepository) Create(ctx context.Context, order *domain.SupplierOrder) error {
 	query := `
 		INSERT INTO supplier_orders (
-			id, partner_id, partner_order_id, status, shopify_draft_order_id,
+			id, partner_id, partner_order_id, status, shopify_draft_order_id, shopify_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
 			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 	`
 
 	now := time.Now()
@@ -59,6 +59,7 @@ func (r *supplierOrderRepository) Create(ctx context.Context, order *domain.Supp
 		order.PartnerOrderID,
 		order.Status,
 		order.ShopifyDraftOrderID,
+		order.ShopifyOrderID,
 		order.CustomerName,
 		order.CustomerPhone,
 		shippingAddressJSON,
@@ -83,7 +84,7 @@ func (r *supplierOrderRepository) Create(ctx context.Context, order *domain.Supp
 
 func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.SupplierOrder, error) {
 	query := `
-		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id,
+		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id, shopify_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
 			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
@@ -94,6 +95,7 @@ func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 	var order domain.SupplierOrder
 	var shippingAddressJSON []byte
 	var shopifyDraftOrderID sql.NullInt64
+	var shopifyOrderID sql.NullInt64
 	var customerPhone sql.NullString
 	var paymentStatus sql.NullString
 	var paymentMethod sql.NullString
@@ -108,6 +110,7 @@ func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 		&order.PartnerOrderID,
 		&order.Status,
 		&shopifyDraftOrderID,
+		&shopifyOrderID,
 		&order.CustomerName,
 		&customerPhone,
 		&shippingAddressJSON,
@@ -132,6 +135,9 @@ func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 
 	if shopifyDraftOrderID.Valid {
 		order.ShopifyDraftOrderID = &shopifyDraftOrderID.Int64
+	}
+	if shopifyOrderID.Valid {
+		order.ShopifyOrderID = &shopifyOrderID.Int64
 	}
 	if customerPhone.Valid {
 		order.CustomerPhone = customerPhone.String
@@ -164,7 +170,7 @@ func (r *supplierOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 
 func (r *supplierOrderRepository) GetByPartnerIDAndPartnerOrderID(ctx context.Context, partnerID uuid.UUID, partnerOrderID string) (*domain.SupplierOrder, error) {
 	query := `
-		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id,
+		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id, shopify_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
 			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
@@ -175,6 +181,7 @@ func (r *supplierOrderRepository) GetByPartnerIDAndPartnerOrderID(ctx context.Co
 	var order domain.SupplierOrder
 	var shippingAddressJSON []byte
 	var shopifyDraftOrderID sql.NullInt64
+	var shopifyOrderID sql.NullInt64
 	var customerPhone sql.NullString
 	var paymentStatus sql.NullString
 	var paymentMethod sql.NullString
@@ -189,6 +196,7 @@ func (r *supplierOrderRepository) GetByPartnerIDAndPartnerOrderID(ctx context.Co
 		&order.PartnerOrderID,
 		&order.Status,
 		&shopifyDraftOrderID,
+		&shopifyOrderID,
 		&order.CustomerName,
 		&customerPhone,
 		&shippingAddressJSON,
@@ -213,6 +221,9 @@ func (r *supplierOrderRepository) GetByPartnerIDAndPartnerOrderID(ctx context.Co
 
 	if shopifyDraftOrderID.Valid {
 		order.ShopifyDraftOrderID = &shopifyDraftOrderID.Int64
+	}
+	if shopifyOrderID.Valid {
+		order.ShopifyOrderID = &shopifyOrderID.Int64
 	}
 	if customerPhone.Valid {
 		order.CustomerPhone = customerPhone.String
@@ -333,9 +344,25 @@ func (r *supplierOrderRepository) UpdateShopifyDraftOrderID(ctx context.Context,
 	return nil
 }
 
+func (r *supplierOrderRepository) UpdateShopifyOrderID(ctx context.Context, id uuid.UUID, orderID int64) error {
+	query := `
+		UPDATE supplier_orders
+		SET shopify_order_id = $2, updated_at = $3
+		WHERE id = $1
+	`
+
+	_, err := r.db.ExecContext(ctx, query, id, orderID, time.Now())
+	if err != nil {
+		r.logger.Error("Failed to update Shopify order ID", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
 func (r *supplierOrderRepository) ListByPartnerID(ctx context.Context, partnerID uuid.UUID, limit, offset int) ([]*domain.SupplierOrder, error) {
 	query := `
-		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id,
+		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id, shopify_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
 			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
@@ -366,7 +393,7 @@ func (r *supplierOrderRepository) ListByPartnerID(ctx context.Context, partnerID
 
 func (r *supplierOrderRepository) ListByStatus(ctx context.Context, status domain.OrderStatus, limit, offset int) ([]*domain.SupplierOrder, error) {
 	query := `
-		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id,
+		SELECT id, partner_id, partner_order_id, status, shopify_draft_order_id, shopify_order_id,
 			customer_name, customer_phone, shipping_address, cart_total,
 			payment_status, payment_method, rejection_reason, tracking_carrier, tracking_number,
 			tracking_url, created_at, updated_at
@@ -399,6 +426,7 @@ func (r *supplierOrderRepository) scanOrder(rows *sql.Rows) (*domain.SupplierOrd
 	var order domain.SupplierOrder
 	var shippingAddressJSON []byte
 	var shopifyDraftOrderID sql.NullInt64
+	var shopifyOrderID sql.NullInt64
 	var customerPhone sql.NullString
 	var paymentStatus sql.NullString
 	var paymentMethod sql.NullString
@@ -413,6 +441,7 @@ func (r *supplierOrderRepository) scanOrder(rows *sql.Rows) (*domain.SupplierOrd
 		&order.PartnerOrderID,
 		&order.Status,
 		&shopifyDraftOrderID,
+		&shopifyOrderID,
 		&order.CustomerName,
 		&customerPhone,
 		&shippingAddressJSON,
@@ -433,6 +462,9 @@ func (r *supplierOrderRepository) scanOrder(rows *sql.Rows) (*domain.SupplierOrd
 
 	if shopifyDraftOrderID.Valid {
 		order.ShopifyDraftOrderID = &shopifyDraftOrderID.Int64
+	}
+	if shopifyOrderID.Valid {
+		order.ShopifyOrderID = &shopifyOrderID.Int64
 	}
 	if customerPhone.Valid {
 		order.CustomerPhone = customerPhone.String

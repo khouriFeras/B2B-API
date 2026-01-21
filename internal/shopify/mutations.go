@@ -19,6 +19,24 @@ mutation draftOrderCreate($input: DraftOrderInput!) {
 }
 `
 
+// DraftOrderCompleteMutation completes a draft order and converts it into an order.
+const DraftOrderCompleteMutation = `
+mutation draftOrderComplete($id: ID!) {
+  draftOrderComplete(id: $id) {
+    draftOrder {
+      id
+      order {
+        id
+      }
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+`
+
 // DraftOrderInput represents the input for creating a draft order
 type DraftOrderInput struct {
 	LineItems     []DraftOrderLineItemInput `json:"lineItems"`
@@ -33,7 +51,8 @@ type DraftOrderInput struct {
 type DraftOrderLineItemInput struct {
 	VariantID    *string  `json:"variantId,omitempty"`
 	Title        *string  `json:"title,omitempty"`
-	Price        *string  `json:"price,omitempty"`
+	// For custom line items (no variantId), Shopify expects originalUnitPrice, not price.
+	OriginalUnitPrice *string `json:"originalUnitPrice,omitempty"`
 	Quantity     int      `json:"quantity"`
 	CustomAttributes []DraftOrderAttributeInput `json:"customAttributes,omitempty"`
 }

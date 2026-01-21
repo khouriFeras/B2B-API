@@ -239,9 +239,9 @@ Mark an order as shipped with tracking information.
 
 ```json
 {
-  "carrier": "UPS",
-  "tracking_number": "1Z999AA10123456784",
-  "tracking_url": "https://www.ups.com/track?tracknum=1Z999AA10123456784"
+  "carrier": "Standard Shipping",
+  "tracking_number": "TRACK123456789",
+  "tracking_url": "https://example.com/track/TRACK123456789"
 }
 ```
 
@@ -251,9 +251,9 @@ Mark an order as shipped with tracking information.
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "status": "SHIPPED",
-  "tracking_carrier": "UPS",
-  "tracking_number": "1Z999AA10123456784",
-  "tracking_url": "https://www.ups.com/track?tracknum=1Z999AA10123456784"
+  "tracking_carrier": "Standard Shipping",
+  "tracking_number": "TRACK123456789",
+  "tracking_url": "https://example.com/track/TRACK123456789"
 }
 ```
 

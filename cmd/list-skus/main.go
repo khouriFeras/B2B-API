@@ -64,7 +64,7 @@ func main() {
 	// Create Shopify client
 	client := shopify.NewClient(cfg.Shopify, logger)
 
-	fmt.Println("🔍 Fetching all SKUs from Shopify...\n")
+	fmt.Println("🔍 Fetching all SKUs from Shopify...")
 
 	// Collect all SKUs
 	allSKUs := []SKUInfo{}

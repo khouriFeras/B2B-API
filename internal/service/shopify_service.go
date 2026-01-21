@@ -30,6 +30,51 @@ func NewShopifyService(cfg config.ShopifyConfig, repos *repository.Repositories,
 	}
 }
 
+// CompleteDraftOrder completes a Shopify draft order and returns the Shopify Order numeric ID.
+func (s *shopifyService) CompleteDraftOrder(ctx context.Context, draftOrderID int64) (int64, error) {
+	draftOrderGID := fmt.Sprintf("gid://shopify/DraftOrder/%d", draftOrderID)
+	variables := map[string]interface{}{
+		"id": draftOrderGID,
+	}
+
+	resp, err := s.client.Execute(shopify.DraftOrderCompleteMutation, variables)
+	if err != nil {
+		return 0, fmt.Errorf("failed to complete draft order: %w", err)
+	}
+
+	// resp.Data is already the "data" object from GraphQL response
+	var result struct {
+		DraftOrderComplete struct {
+			DraftOrder struct {
+				ID    string `json:"id"`
+				Order struct {
+					ID string `json:"id"`
+				} `json:"order"`
+			} `json:"draftOrder"`
+			UserErrors []struct {
+				Field   []string `json:"field"`
+				Message string   `json:"message"`
+			} `json:"userErrors"`
+		} `json:"draftOrderComplete"`
+	}
+
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return 0, fmt.Errorf("failed to parse draft order complete response: %w", err)
+	}
+
+	if len(result.DraftOrderComplete.UserErrors) > 0 {
+		return 0, fmt.Errorf("shopify user errors: %v", result.DraftOrderComplete.UserErrors)
+	}
+
+	// Extract numeric Order ID from GID (gid://shopify/Order/123)
+	orderGID := result.DraftOrderComplete.DraftOrder.Order.ID
+	orderID, err := extractIDFromGID(orderGID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to extract order ID: %w", err)
+	}
+	return orderID, nil
+}
+
 // CreateDraftOrder creates a Shopify draft order from a supplier order
 func (s *shopifyService) CreateDraftOrder(
 	ctx context.Context,
@@ -65,7 +110,7 @@ func (s *shopifyService) CreateDraftOrder(
 			
 			lineItems = append(lineItems, shopify.DraftOrderLineItemInput{
 				Title:  &title,
-				Price:  &priceStr,
+				OriginalUnitPrice: &priceStr,
 				Quantity: item.Quantity,
 				CustomAttributes: customAttrs,
 			})
@@ -139,31 +184,30 @@ func (s *shopifyService) CreateDraftOrder(
 	}
 
 	// Parse response to get draft order ID
-	// The response structure: { "data": { "draftOrderCreate": { "draftOrder": { "id": "gid://shopify/DraftOrder/..." } } } }
+	// NOTE: shopify.Client.Execute returns GraphQLResponse where resp.Data is already the "data" object.
+	// So resp.Data looks like: { "draftOrderCreate": { ... } } (no outer {"data": ...} wrapper).
 	var result struct {
-		Data struct {
-			DraftOrderCreate struct {
-				DraftOrder struct {
-					ID string `json:"id"`
-				} `json:"draftOrder"`
-				UserErrors []struct {
-					Field   []string `json:"field"`
-					Message string   `json:"message"`
-				} `json:"userErrors"`
-			} `json:"draftOrderCreate"`
-		} `json:"data"`
+		DraftOrderCreate struct {
+			DraftOrder struct {
+				ID string `json:"id"`
+			} `json:"draftOrder"`
+			UserErrors []struct {
+				Field   []string `json:"field"`
+				Message string   `json:"message"`
+			} `json:"userErrors"`
+		} `json:"draftOrderCreate"`
 	}
 
 	if err := json.Unmarshal(resp.Data, &result); err != nil {
 		return 0, fmt.Errorf("failed to parse draft order response: %w", err)
 	}
 
-	if len(result.Data.DraftOrderCreate.UserErrors) > 0 {
-		return 0, fmt.Errorf("shopify user errors: %v", result.Data.DraftOrderCreate.UserErrors)
+	if len(result.DraftOrderCreate.UserErrors) > 0 {
+		return 0, fmt.Errorf("shopify user errors: %v", result.DraftOrderCreate.UserErrors)
 	}
 
 	// Extract numeric ID from GID
-	draftOrderGID := result.Data.DraftOrderCreate.DraftOrder.ID
+	draftOrderGID := result.DraftOrderCreate.DraftOrder.ID
 	draftOrderID, err := extractIDFromGID(draftOrderGID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to extract draft order ID: %w", err)

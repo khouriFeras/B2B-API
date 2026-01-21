@@ -20,13 +20,13 @@ go run cmd/create-partner/main.go "Zain Shop" "zain-test-api-key-2024"
 
 Example output:
 ```
-✅ Partner created successfully!
+ Partner created successfully!
 
 Partner ID: 550e8400-e29b-41d4-a716-446655440000
 Partner Name: Zain Shop
 API Key: zain-test-api-key-2024
 
-⚠️  IMPORTANT: Save this API key securely! You won't be able to see it again.
+  IMPORTANT: Save this API key securely! You won't be able to see it again.
 
 Use this API key in the Authorization header:
 Authorization: Bearer zain-test-api-key-2024
@@ -83,15 +83,15 @@ $body = @{
         }
     )
     customer = @{
-        name = "John Doe"
+        name = "feras"
         phone = "+1234567890"
     }
     shipping = @{
-        street = "123 Main Street"
-        city = "New York"
-        state = "NY"
+        street = "amman street"
+        city = "amman"
+        state = "khalda"
         postal_code = "10001"
-        country = "US"
+        country = "jordan"
     }
     totals = @{
         subtotal = 79.97
@@ -195,9 +195,9 @@ Invoke-WebRequest -Uri "http://localhost:8080/v1/admin/orders/550e8400-e29b-41d4
 
 ```powershell
 $body = @{
-    carrier = "UPS"
-    tracking_number = "1Z999AA10123456784"
-    tracking_url = "https://www.ups.com/track?tracknum=1Z999AA10123456784"
+    carrier = "Standard Shipping"
+    tracking_number = "TRACK123456789"
+    tracking_url = "https://example.com/track/TRACK123456789"
 } | ConvertTo-Json
 
 Invoke-WebRequest -Uri "http://localhost:8080/v1/admin/orders/550e8400-e29b-41d4-a716-446655440000/ship" `

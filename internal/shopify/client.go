@@ -53,8 +53,8 @@ type GraphQLResponse struct {
 
 // GraphQLError represents a GraphQL error
 type GraphQLError struct {
-	Message string   `json:"message"`
-	Path    []string `json:"path,omitempty"`
+	Message string        `json:"message"`
+	Path    []interface{} `json:"path,omitempty"`
 }
 
 // Execute executes a GraphQL query/mutation
@@ -96,11 +96,15 @@ func (c *Client) Execute(query string, variables map[string]interface{}) (*Graph
 
 	var graphQLResp GraphQLResponse
 	if err := json.Unmarshal(body, &graphQLResp); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal response: %w, body: %s", err, string(body))
 	}
 
 	if len(graphQLResp.Errors) > 0 {
-		return nil, fmt.Errorf("graphQL errors: %v", graphQLResp.Errors)
+		errorMessages := make([]string, len(graphQLResp.Errors))
+		for i, err := range graphQLResp.Errors {
+			errorMessages[i] = err.Message
+		}
+		return nil, fmt.Errorf("graphQL errors: %s", strings.Join(errorMessages, "; "))
 	}
 
 	return &graphQLResp, nil

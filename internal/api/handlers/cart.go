@@ -147,6 +147,17 @@ func HandleCartSubmit(cfg *config.Config, repos *repository.Repositories, logger
 					logger.Warn("Failed to update order with draft order ID", zap.Error(err))
 				}
 				order.ShopifyDraftOrderID = &draftOrderID
+
+				// Complete draft order -> create a real Shopify Order (so it shows under Orders, not Drafts)
+				shopifyOrderID, err := shopifyService.CompleteDraftOrder(c.Request.Context(), draftOrderID)
+				if err != nil {
+					logger.Error("Failed to complete Shopify draft order", zap.Error(err))
+				} else {
+					if err := repos.SupplierOrder.UpdateShopifyOrderID(c.Request.Context(), order.ID, shopifyOrderID); err != nil {
+						logger.Warn("Failed to update order with Shopify order ID", zap.Error(err))
+					}
+					order.ShopifyOrderID = &shopifyOrderID
+				}
 			}
 		}
 

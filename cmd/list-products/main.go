@@ -55,7 +55,7 @@ func main() {
 	// Create Shopify client
 	client := shopify.NewClient(cfg.Shopify, logger)
 
-	fmt.Println("🔍 Fetching all products from Shopify...\n")
+	fmt.Println("🔍 Fetching all products from Shopify...")
 
 	hasNextPage := true
 	after := ""

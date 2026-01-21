@@ -19,6 +19,7 @@ type OrderResponse struct {
 	PartnerOrderID      string                 `json:"partner_order_id"`
 	Status              domain.OrderStatus     `json:"status"`
 	ShopifyDraftOrderID *int64                 `json:"shopify_draft_order_id,omitempty"`
+	ShopifyOrderID      *int64                 `json:"shopify_order_id,omitempty"`
 	CustomerName        string                 `json:"customer_name"`
 	CustomerPhone       string                 `json:"customer_phone,omitempty"`
 	ShippingAddress     map[string]interface{} `json:"shipping_address"`
@@ -107,6 +108,7 @@ func HandleGetOrder(repos *repository.Repositories, logger *zap.Logger) gin.Hand
 			PartnerOrderID:      order.PartnerOrderID,
 			Status:              order.Status,
 			ShopifyDraftOrderID: order.ShopifyDraftOrderID,
+			ShopifyOrderID:      order.ShopifyOrderID,
 			CustomerName:        order.CustomerName,
 			ShippingAddress:     order.ShippingAddress,
 			CartTotal:           order.CartTotal,
