@@ -91,7 +91,7 @@ API keys are provided by JafarShop when your partner account is set up. You'll r
 - Base URL for the API
 - Integration instructions
 
-**⚠️ Important:** API keys are shown only once during setup. Store them securely!
+** Important:** API keys are shown only once during setup. Store them securely!
 
 ### Security Best Practices
 
@@ -224,7 +224,7 @@ Submit a cart for order processing.
     }
   ],
   "customer": {
-    "name": "John Doe",
+    "name": "FERAS",
     "phone": "+1234567890"
   },
   "shipping": {
